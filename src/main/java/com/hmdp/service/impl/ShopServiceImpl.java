@@ -60,7 +60,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         //2.判断是否存在
         if (StrUtil.isNotBlank(shopJson)) {
             //3.存在，直接返回
-            return JSONUtil.toBean(shopJson, Shop.class);;
+            return JSONUtil.toBean(shopJson, Shop.class);
         }
         //判断命中的是否是空值
         if (shopJson != null) {
@@ -85,7 +85,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
             String json = stringRedisTemplate.opsForValue().get(RedisConstants.CACHE_SHOP_KEY + id);
             if (StrUtil.isNotBlank(json)) {
                 //存在无需查询数据库写入redis
-                return JSONUtil.toBean(shopJson, Shop.class);;
+                return JSONUtil.toBean(shopJson, Shop.class);
             }
 
             shop = getById(id);
