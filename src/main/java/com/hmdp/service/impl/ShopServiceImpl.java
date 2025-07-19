@@ -67,8 +67,8 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
                 id,
                 Shop.class,
                 this::getById,
-                20L,//TODO 测试
-                TimeUnit.SECONDS);
+                RedisConstants.CACHE_SHOP_TTL,
+                TimeUnit.MINUTES);
         if (shop == null){
             return Result.fail("店铺不存在！");
         }
