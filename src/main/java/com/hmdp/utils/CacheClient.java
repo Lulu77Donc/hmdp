@@ -98,7 +98,22 @@ public class CacheClient {
         String json = stringRedisTemplate.opsForValue().get(key);
         //2.判断是否存在
         if (StrUtil.isBlank(json)) {
-            //3.存在，直接返回
+            // 尝试异步重建
+            String lockKey = RedisConstants.LOCK_SHOP_KEY + id;
+            boolean isLock = tryLock(lockKey);
+            if (isLock) {
+                CACHE_REBUILD_EXECUTOR.submit(() -> {
+                    try {
+                        R r = dbFallback.apply(id);
+                        this.setWithLogicalExpire(key, r, time, unit);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    } finally {
+                        unLock(lockKey);
+                    }
+                });
+            }
+            // 返回 null，防止击穿
             return null;
         }
         //命中，需要判断过期时间，先把json反序列化为对象
@@ -120,7 +135,7 @@ public class CacheClient {
             //1.从redis查询商铺缓存
             String json2 = stringRedisTemplate.opsForValue().get(key);
             //2.判断是否存在
-            if (StrUtil.isBlank(json)) {
+            if (StrUtil.isBlank(json2)) {
                 //3.不存在，直接返回
                 return null;
             }
